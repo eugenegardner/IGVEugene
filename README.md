@@ -8,12 +8,14 @@ This is a short script that slices bams at a provided set of coordinates and the
 
 | Option | Description | Default |
 |:-------------- |:------------ |:--------- |
-| -bams | input of bam paths and variant coordinates | **none** |
+| -bams | input of bam paths and variant coordinates (see example_bams.txt) | **none** |
 | -hostname | ip address or hostname of computer on which remote IGV is running | **none** |
 | -port | port number set within IGV to accept data | 60151 |
 | -window | window size to slice bams and view in IGV | 50 |
 | -slicedir | directory where bam slices are stored | **none** |
 | -volumes | directory where bam slices are stored on local machine | **none** |
+
+**Note:** -slicedir and -volumes are seperate so that if bams and slices are stored on a remote machine, you can provide a different directory to store slices and a different directory to view from. On macos, this is typically done via mounting a fileshare which will appear in the `/Volumes/` directory.
 
 ## Input
 
