@@ -12,10 +12,11 @@ GetOptions(\%args,
 		   "hostname=s",
 		   "port=i",
 		   "window=i",
-		   "slicedir=s"
+		   "slicedir=s",
+		   "volumes=s"
 	);
 
-my ($bamFile, $hostname, $port, $window, $slicedir) = setOptions(\%args);
+my ($bamFile, $hostname, $port, $window, $slicedir, $volumes) = setOptions(\%args);
 
 open (BAM, "<$bamFile") || die "Cannot open file: $!";
 
@@ -41,7 +42,8 @@ foreach my $site (<BAM>) {
 	my $left = $data[4] - $window;
 	my $right = $data[4] + $window;
 	
-	my $dir = $slicedir; 
+	my $dir = $slicedir;
+	my $loadDir = $volumes;
 
 	my $proband = $data[0];
 	my ($pName, $a, $b) = fileparse($proband, qr/\.[^.]*/);
@@ -50,18 +52,18 @@ foreach my $site (<BAM>) {
 
 	print $socket "new\n";
 	print $socket "setSleepInterval 100\n";
-	samtools($proband, $chr, $left, $right, "/nfs/" . $dir . "proband.$pName.$chr" . "_$pos.bam");
-	print $socket "load /Volumes/$dir" . "proband.$pName.$chr" . "_$pos.bam\n";
+	samtools($proband, $chr, $left, $right, $slicedir . "proband.$pName.$chr" . "_$pos.bam");
+	print $socket "load $volumes" . "proband.$pName.$chr" . "_$pos.bam\n";
 	
 	if ($mum ne "-") {
 	    my ($mName, $c, $d) = fileparse($mum, qr/\.[^.]*/);
-	    samtools($mum, $chr, $left, $right, "/nfs/" . $dir . "mum.$mName.$chr" . "_$pos.bam");
-	    print $socket "load /Volumes/$dir" . "mum.$mName.$chr" . "_$pos.bam\n";
+	    samtools($mum, $chr, $left, $right, $slicedir . "mum.$mName.$chr" . "_$pos.bam");
+	    print $socket "load $volumes" . "mum.$mName.$chr" . "_$pos.bam\n";
 	}
 	if ($dad ne "-") {
 	    my ($dName, $c, $d) = fileparse($dad, qr/\.[^.]*/);
-	    samtools($dad, $chr, $left, $right, "/nfs/" . $dir . "dad.$dName.$chr" . "_$pos.bam");
-	    print $socket "load /Volumes/$dir" . "dad.$dName.$chr" . "_$pos.bam\n";
+	    samtools($dad, $chr, $left, $right, $slicedir . "dad.$dName.$chr" . "_$pos.bam");
+	    print $socket "load $volumes" . "dad.$dName.$chr" . "_$pos.bam\n";
 	}
 
 	print $socket "squish\n";
@@ -71,10 +73,12 @@ foreach my $site (<BAM>) {
 	print "P2  : $dad\n";
 
 	print $socket "goto $chr:$left-$right\n";
+
+	print "Site Quality <enter value and hit return>: ";
 	my $wait = <STDIN>;
 	chomp $wait;
 	
-	$results{$chr . ":" . $pos} = $wait;
+	$results{$chr . "," . $pos . "," . $pName} = $wait;
 
 	if ($wait eq 'QUIT') {
 
@@ -116,6 +120,18 @@ sub setOptions {
 		die "Need directory for -slicedir!";
 	}
 
+	my $volumes;
+	if ($$opt{volumes}) {
+		if (-e $$opt{volumes} && -d $$opt{volumes}) {
+			$slicedir = $$opt{volumes};
+		} else {
+			die "path provided to -volumes either doesn't exist or is not a directory!";
+		}
+	} else {
+		die "Need directory for -volumes!";
+	}
+	
+
 	my $port;
 	if ($$opt{port}) {
 		$port = $$opt{port};
@@ -131,7 +147,7 @@ sub setOptions {
 		$window = 50;
 	}
 	
-	return($bamFile, $hostname, $port, $window, $slicedir);
+	return($bamFile, $hostname, $port, $window, $slicedir, $volumes);
 
 }
 	
