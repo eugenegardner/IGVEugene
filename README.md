@@ -29,12 +29,14 @@ This script takes a file (provided via -bams) in the following column format:
 | 4 | variant chromosome |
 | 5 | variant position |
 
+Columns 2 **OR** 3 can be blank in the form of a '-'.
+
 ## Use
 
 1. Open IGV and ensure port information is set (go to View->Preferences->Enable Port) to either 60151 or whatever value is in that box.
 
 2. Run trio_slicer:
 
-`./trio_slicer.pl -bams <BAMFILE> -hostname <192.168.1.0> -slicedir /scratch/bamslices/ -volumes /Volumes/bamslices/`
+`./trio_slicer.pl -bams <BAMFILE> -hostname <192.168.0.1> -slicedir /scratch/bamslices/ -volumes /Volumes/bamslices/`
 
 3. Look at bams. The script will proceed one line at a time and pause with the prompt "Site Quality: " and wait for the user to put in some value, or simply press the "RETURN" key. Or, if "QUIT" is entered, all previous variant site information will be dumped for the user.
