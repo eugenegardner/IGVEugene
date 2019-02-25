@@ -1,0 +1,1 @@
+/scratch/proband_1.bam	/scratch/mum_1.bam	/scratch/dad_1.bam	1	10001247
