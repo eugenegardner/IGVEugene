@@ -83,8 +83,7 @@ foreach my $site (<BAM>) {
 	if ($wait eq 'QUIT') {
 
 	    dumpResults(\%results);
-	    die "Aborted: $!";
-
+		die;
 	}
 
 }
@@ -122,11 +121,7 @@ sub setOptions {
 
 	my $volumes;
 	if ($$opt{volumes}) {
-		if (-e $$opt{volumes} && -d $$opt{volumes}) {
-			$slicedir = $$opt{volumes};
-		} else {
-			die "path provided to -volumes either doesn't exist or is not a directory!";
-		}
+		$volumes = $$opt{volumes};
 	} else {
 		die "Need directory for -volumes!";
 	}
@@ -136,7 +131,7 @@ sub setOptions {
 	if ($$opt{port}) {
 		$port = $$opt{port};
 	} else {
-		print "No value for -port provided, setting to default IGV port of 60151";
+		print "No value for -port provided, setting to default IGV port of 60151\n\n";
 		$port = 60151;
 	}
 
@@ -163,8 +158,6 @@ sub samtools {
 
 	my ($bam, $chr, $start, $end, $out) = @_;
 	my $cmd = "samtools view -bo $out $bam \'$chr:$start-$end\'";
-	
-	print "$cmd\n";
 	
 	system($cmd);
 	
