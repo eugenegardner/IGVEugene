@@ -75,7 +75,8 @@ foreach my $site (<BAM>) {
 
 	## Print additional columns:
 	for (my $x = 5; $x < scalar(@data); $x++) {
-		print "Dat1: $data[$x]\n";
+		my $datNum = $x - 4
+		print "Dat$datNum: $data[$x]\n";
 	}
 
 	print $socket "goto $chr:$left-$right\n";
