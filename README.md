@@ -28,8 +28,9 @@ This script takes a file (provided via -bams) in the following column format:
 | 3 | Dad bam path |
 | 4 | variant chromosome |
 | 5 | variant position |
+| 6 - n | Additional columns of information, will be printed at each site with label Dat[Col#] |
 
-Columns 2 **OR** 3 can be blank in the form of a '-'.
+Columns 2 **OR** 3 can be blank in the form of a '-' to represent no proband/non trio samples.
 
 ## Use
 

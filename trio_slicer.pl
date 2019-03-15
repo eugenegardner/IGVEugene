@@ -68,9 +68,15 @@ foreach my $site (<BAM>) {
 
 	print $socket "squish\n";
 	
+	print "Pos : $chr:$pos\n";
  	print "Prob: $proband\n";
 	print "P1  : $mum\n";
 	print "P2  : $dad\n";
+
+	## Print additional columns:
+	for (my $x = 5; $x < scalar(@data); $x++) {
+		print "Dat1: $data[$x]\n";
+	}
 
 	print $socket "goto $chr:$left-$right\n";
 
