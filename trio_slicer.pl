@@ -75,7 +75,7 @@ foreach my $site (<BAM>) {
 
 	## Print additional columns:
 	for (my $x = 5; $x < scalar(@data); $x++) {
-		my $datNum = $x - 4
+		my $datNum = $x - 4;
 		print "Dat$datNum: $data[$x]\n";
 	}
 
