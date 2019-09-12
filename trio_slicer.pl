@@ -79,7 +79,6 @@ foreach my $site (<BAM>) {
 
 		print $socket "squish\n";
 	
-<<<<<<< HEAD
 		print "Pos : $chr:$pos\n";
 		print "Prob: $proband\n";
 		print "P1  : $mum\n";
@@ -94,26 +93,14 @@ foreach my $site (<BAM>) {
 				print "Dat$datNum: $data[$x]\n";
 			}
 		}
-=======
-	print "Pos : $chr:$pos\n";
- 	print "Prob: $proband\n";
-	print "P1  : $mum\n";
-	print "P2  : $dad\n";
-
-	## Print additional columns:
-	for (my $x = 5; $x < scalar(@data); $x++) {
-		my $datNum = $x - 4;
-		print "Dat$datNum: $data[$x]\n";
-	}
->>>>>>> dbb5fe53fdafaa79910e7c4568d9c48f564b62c5
-
+		
 		print $socket "goto $chr:$left-$right\n";
 
 		print "Site Quality <enter value and hit return>: ";
 		my $wait = <STDIN>;
 		chomp $wait;
 	
-		$results{$chr . "," . $pos . "," . $pName} = $wait;
+		$results{$chr . "\t" . $pos . "\t" . $pName} = $wait;
 
 		if ($wait eq 'QUIT') {
 
