@@ -13,10 +13,11 @@ GetOptions(\%args,
 		   "port=i",
 		   "window=i",
 		   "slicedir=s",
-		   "volumes=s"
+		   "volumes=s",
+		   "output=s"
 	);
 
-my ($bamFile, $hostname, $port, $window, $slicedir, $volumes) = setOptions(\%args);
+my ($bamFile, $hostname, $port, $window, $slicedir, $volumes, $output) = setOptions(\%args);
 
 open (BAM, "<$bamFile") || die "Cannot open file: $!";
 
@@ -27,72 +28,86 @@ my $socket = new IO::Socket::INET (PeerHost => $hostname,
 
 print "Socket connection successful.\n";
 
+open (OUTPUT, ">$output") || die "cannot make output: $!";
+
 my %results;
 
 print "Iterating through files/coordinates in -bams, type QUIT to exit and pint all information!\n\n";
 
+my @header;
+my $foundheader = 'false';
+
 foreach my $site (<BAM>) {
 	
 	chomp $site;
-	
-	my @data = split("\t", $site);
-	
-	my $chr = $data[3];
-	my $pos = $data[4];
-	my $left = $data[4] - $window;
-	my $right = $data[4] + $window;
-	
-	my $dir = $slicedir;
-	my $loadDir = $volumes;
 
-	my $proband = $data[0];
-	my ($pName, $a, $b) = fileparse($proband, qr/\.[^.]*/);
-	my $mum = $data[1];
-	my $dad = $data[2];
-
-	print $socket "new\n";
-	print $socket "setSleepInterval 100\n";
-	samtools($proband, $chr, $left, $right, $slicedir . "proband.$pName.$chr" . "_$pos.bam");
-	print $socket "load $volumes" . "proband.$pName.$chr" . "_$pos.bam\n";
+	if ($site =~ /^#/) {
+		@header = split("\t", $site);
+		$foundheader = 'true';
+	} else {
 	
-	if ($mum ne "-") {
-	    my ($mName, $c, $d) = fileparse($mum, qr/\.[^.]*/);
-	    samtools($mum, $chr, $left, $right, $slicedir . "mum.$mName.$chr" . "_$pos.bam");
-	    print $socket "load $volumes" . "mum.$mName.$chr" . "_$pos.bam\n";
+		my @data = split("\t", $site);
+	
+		my $chr = $data[3];
+		my $pos = $data[4];
+		my $left = $data[4] - $window;
+		my $right = $data[4] + $window;
+		
+		my $dir = $slicedir;
+		my $loadDir = $volumes;
+
+		my $proband = $data[0];
+		my ($pName, $a, $b) = fileparse($proband, qr/\.[^.]*/);
+		my $mum = $data[1];
+		my $dad = $data[2];
+
+		print $socket "new\n";
+		print $socket "setSleepInterval 100\n";
+		samtools($proband, $chr, $left, $right, $slicedir . "proband.$pName.$chr" . "_$pos.bam");
+		print $socket "load $volumes" . "proband.$pName.$chr" . "_$pos.bam\n";
+		
+		if ($mum ne "-") {
+			my ($mName, $c, $d) = fileparse($mum, qr/\.[^.]*/);
+			samtools($mum, $chr, $left, $right, $slicedir . "mum.$mName.$chr" . "_$pos.bam");
+			print $socket "load $volumes" . "mum.$mName.$chr" . "_$pos.bam\n";
+		}
+		if ($dad ne "-") {
+			my ($dName, $c, $d) = fileparse($dad, qr/\.[^.]*/);
+			samtools($dad, $chr, $left, $right, $slicedir . "dad.$dName.$chr" . "_$pos.bam");
+			print $socket "load $volumes" . "dad.$dName.$chr" . "_$pos.bam\n";
+		}
+
+		print $socket "squish\n";
+	
+		print "Pos : $chr:$pos\n";
+		print "Prob: $proband\n";
+		print "P1  : $mum\n";
+		print "P2  : $dad\n";
+
+		## Print additional columns:
+		for (my $x = 5; $x < scalar(@data); $x++) {
+			if ($foundheader eq 'true' && scalar(@header) == scalar(@data)) {
+				print "$header[$x]: $data[$x]\n";
+			} else {
+				my $datNum = $x - 4;
+				print "Dat$datNum: $data[$x]\n";
+			}
+		}
+
+		print $socket "goto $chr:$left-$right\n";
+
+		print "Site Quality <enter value and hit return>: ";
+		my $wait = <STDIN>;
+		chomp $wait;
+	
+		$results{$chr . "," . $pos . "," . $pName} = $wait;
+
+		if ($wait eq 'QUIT') {
+
+			dumpResults(\%results);
+			die;
+		}
 	}
-	if ($dad ne "-") {
-	    my ($dName, $c, $d) = fileparse($dad, qr/\.[^.]*/);
-	    samtools($dad, $chr, $left, $right, $slicedir . "dad.$dName.$chr" . "_$pos.bam");
-	    print $socket "load $volumes" . "dad.$dName.$chr" . "_$pos.bam\n";
-	}
-
-	print $socket "squish\n";
-	
-	print "Pos : $chr:$pos\n";
- 	print "Prob: $proband\n";
-	print "P1  : $mum\n";
-	print "P2  : $dad\n";
-
-	## Print additional columns:
-	for (my $x = 5; $x < scalar(@data); $x++) {
-		my $datNum = $x - 4
-		print "Dat$datNum: $data[$x]\n";
-	}
-
-	print $socket "goto $chr:$left-$right\n";
-
-	print "Site Quality <enter value and hit return>: ";
-	my $wait = <STDIN>;
-	chomp $wait;
-	
-	$results{$chr . "," . $pos . "," . $pName} = $wait;
-
-	if ($wait eq 'QUIT') {
-
-	    dumpResults(\%results);
-		die;
-	}
-
 }
 
 dumpResults(\%results);
@@ -148,8 +163,15 @@ sub setOptions {
 	} else {
 		$window = 50;
 	}
+
+	my $output;
+	if ($$opt{output}) {
+		$output = $$opt{output};
+	} else {
+		$output = *STDOUT;
+	}
 	
-	return($bamFile, $hostname, $port, $window, $slicedir, $volumes);
+	return($bamFile, $hostname, $port, $window, $slicedir, $volumes, $output);
 
 }
 	
@@ -157,7 +179,7 @@ sub dumpResults {
 
     my ($results) = @_;
     foreach (sort keys %$results) {
-	print "$_\t$$results{$_}\n";
+	print OUTPUT "$_\t$$results{$_}\n";
     }
 }
 
