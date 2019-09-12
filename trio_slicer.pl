@@ -28,8 +28,6 @@ my $socket = new IO::Socket::INET (PeerHost => $hostname,
 
 print "Socket connection successful.\n";
 
-open (OUTPUT, ">$output") || die "cannot make output: $!";
-
 my %results;
 
 print "Iterating through files/coordinates in -bams, type QUIT to exit and pint all information!\n\n";
@@ -104,13 +102,13 @@ foreach my $site (<BAM>) {
 
 		if ($wait eq 'QUIT') {
 
-			dumpResults(\%results);
-			die;
+			dumpResults(\%results, $output);
+			die "Indelible exited via user command";
 		}
 	}
 }
 
-dumpResults(\%results);
+dumpResults(\%results, $output);
 
 sub setOptions {
 
@@ -165,8 +163,9 @@ sub setOptions {
 	}
 
 	my $output;
+	
 	if ($$opt{output}) {
-		$output = $$opt{output};
+		open($output, ">$$opt{output}") || die "cannot make output: $!";
 	} else {
 		$output = *STDOUT;
 	}
@@ -177,9 +176,9 @@ sub setOptions {
 	
 sub dumpResults {
 
-    my ($results) = @_;
+    my ($results, $outputfh) = @_;
     foreach (sort keys %$results) {
-	print OUTPUT "$_\t$$results{$_}\n";
+	print $outputfh "$_\t$$results{$_}\n";
     }
 }
 
