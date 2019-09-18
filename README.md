@@ -2,7 +2,7 @@
 
 Load Trio Data into IGV.
 
-This is a short script that slices bams at a provided set of coordinates and then loads them into IGV interactively. The script then pauses for user input with a prompt on the quality of the site. After running, the script then dumps all variant (with coordinate and proband name) qualities.
+This is a short script that slices bams at a provided set of coordinates and then loads them into IGV interactively. The script then pauses for user input with a prompt on the quality of the site. Depending on user input after running, the script either dumps all variant (with coordinate and proband name) qualities to STDOUT or a provided user file.
 
 ## Options
 
@@ -17,6 +17,8 @@ This is a short script that slices bams at a provided set of coordinates and the
 | -output | file to write results to. Default writes to STDOUT. | **none** |
 
 **Note:** -slicedir and -volumes are seperate so that if bams and slices are stored on a remote machine, you can provide a different directory to store slices and a different directory to view from. On macos, this is typically done via mounting a fileshare which will appear in the `/Volumes/` directory.
+
+**Note:** If providing a file for -output IGVEugene will print results to this file as annotation is entered. IGVEugene *will not* clobber a file that is already present and will not run. Please either move the old file or use a different file name.
 
 ## Input
 
