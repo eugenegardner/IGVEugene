@@ -108,10 +108,19 @@ foreach my $site (<BAM>) {
 
 		}
 
-		if ($wait eq 'QUIT' && $is_stdout eq 'TRUE') {
+		if ($wait eq 'QUIT') {
 
-			dumpResults(\%results, $output);
-			die "Indelible exited via user command";
+			if ($is_stdout eq 'TRUE') {
+
+				dumpResults(\%results, $output);
+				die "Indelible exited via user command, dumping to STDOUT";
+
+			} else {
+				
+				die "Indelible exited via user command";
+
+			}
+
 		}
 	}
 }
