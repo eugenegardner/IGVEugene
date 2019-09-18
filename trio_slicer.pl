@@ -98,16 +98,6 @@ foreach my $site (<BAM>) {
 		my $wait = <STDIN>;
 		chomp $wait;
 	
-		if ($is_stdout eq 'TRUE') {
-
-			$results{$chr . "\t" . $pos . "\t" . $pName} = $wait;
-
-		} else {
-
-			print $output $chr . "\t" . $pos . "\t" . $pName . "\t" . $wait . "\n";
-
-		}
-
 		if ($wait eq 'QUIT') {
 
 			if ($is_stdout eq 'TRUE') {
@@ -122,6 +112,18 @@ foreach my $site (<BAM>) {
 			}
 
 		}
+		
+		if ($is_stdout eq 'TRUE') {
+
+			$results{$chr . "\t" . $pos . "\t" . $pName} = $wait;
+
+		} else {
+
+			print $output $chr . "\t" . $pos . "\t" . $pName . "\t" . $wait . "\n";
+
+		}
+
+		
 	}
 }
 
