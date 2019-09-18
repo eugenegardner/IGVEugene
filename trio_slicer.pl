@@ -17,7 +17,7 @@ GetOptions(\%args,
 		   "output=s"
 	);
 
-my ($bamFile, $hostname, $port, $window, $slicedir, $volumes, $output) = setOptions(\%args);
+my ($bamFile, $hostname, $port, $window, $slicedir, $volumes, $output, $is_stdout) = setOptions(\%args);
 
 open (BAM, "<$bamFile") || die "Cannot open file: $!";
 
@@ -98,9 +98,17 @@ foreach my $site (<BAM>) {
 		my $wait = <STDIN>;
 		chomp $wait;
 	
-		$results{$chr . "\t" . $pos . "\t" . $pName} = $wait;
+		if ($is_stdout) {
 
-		if ($wait eq 'QUIT') {
+			$results{$chr . "\t" . $pos . "\t" . $pName} = $wait;
+
+		} else {
+
+			print $output $chr . "\t" . $pos . "\t" . $pName . "\t" . $wait . "\n";
+
+		}
+
+		if ($wait eq 'QUIT' & $is_stdout) {
 
 			dumpResults(\%results, $output);
 			die "Indelible exited via user command";
@@ -163,14 +171,16 @@ sub setOptions {
 	}
 
 	my $output;
-	
+	my $is_stdout = 'TRUE';
+
 	if ($$opt{output}) {
+		$is_stdout = 'FALSE';
 		open($output, ">$$opt{output}") || die "cannot make output: $!";
 	} else {
 		$output = *STDOUT;
 	}
 	
-	return($bamFile, $hostname, $port, $window, $slicedir, $volumes, $output);
+	return($bamFile, $hostname, $port, $window, $slicedir, $volumes, $output, $is_stdout);
 
 }
 	
