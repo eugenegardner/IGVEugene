@@ -98,7 +98,7 @@ foreach my $site (<BAM>) {
 		my $wait = <STDIN>;
 		chomp $wait;
 	
-		if ($is_stdout) {
+		if ($is_stdout eq 'TRUE') {
 
 			$results{$chr . "\t" . $pos . "\t" . $pName} = $wait;
 
@@ -108,7 +108,7 @@ foreach my $site (<BAM>) {
 
 		}
 
-		if ($wait eq 'QUIT' & $is_stdout) {
+		if ($wait eq 'QUIT' && $is_stdout eq 'TRUE') {
 
 			dumpResults(\%results, $output);
 			die "Indelible exited via user command";
@@ -174,6 +174,9 @@ sub setOptions {
 	my $is_stdout = 'TRUE';
 
 	if ($$opt{output}) {
+		if (-e $$opt{output}) {
+			die "Will not clobber file $$opt{output}... Please enter a new file name or move the old file...\n";
+		}
 		$is_stdout = 'FALSE';
 		open($output, ">$$opt{output}") || die "cannot make output: $!";
 	} else {
