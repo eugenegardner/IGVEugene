@@ -30,7 +30,7 @@ print "Socket connection successful.\n";
 
 my %results;
 
-print "Iterating through files/coordinates in -bams, type QUIT to exit and pint all information!\n\n";
+print "Iterating through files/coordinates in -bams, type QUIT to exit and print all information!\n\n";
 
 my @header;
 my $foundheader = 'false';
@@ -103,11 +103,11 @@ foreach my $site (<BAM>) {
 			if ($is_stdout eq 'TRUE') {
 
 				dumpResults(\%results, $output);
-				die "Indelible exited via user command, dumping to STDOUT";
+				die "IGVEugene exited via user command, dumping to STDOUT";
 
 			} else {
 				
-				die "Indelible exited via user command";
+				die "IGVEugene exited via user command";
 
 			}
 
