@@ -8,6 +8,7 @@ use Getopt::Long;
 
 my %args;
 GetOptions(\%args,
+		   "irods",
 		   "bams=s",
 		   "hostname=s",
 		   "port=i",
@@ -17,7 +18,7 @@ GetOptions(\%args,
 		   "output=s"
 	);
 
-my ($bamFile, $hostname, $port, $window, $slicedir, $volumes, $output, $is_stdout) = setOptions(\%args);
+my ($bamFile, $hostname, $port, $window, $slicedir, $volumes, $output, $is_stdout, $irods) = setOptions(\%args);
 
 open (BAM, "<$bamFile") || die "Cannot open file: $!";
 
@@ -193,8 +194,15 @@ sub setOptions {
 	} else {
 		$output = *STDOUT;
 	}
+
+	my $irods;
+	if ($$opt{irods}) {
+		$irods = 'true';
+	} else {
+		$irods = 'false'
+	}
 	
-	return($bamFile, $hostname, $port, $window, $slicedir, $volumes, $output, $is_stdout);
+	return($bamFile, $hostname, $port, $window, $slicedir, $volumes, $output, $is_stdout, $irods);
 
 }
 	
@@ -202,17 +210,23 @@ sub dumpResults {
 
     my ($results, $outputfh) = @_;
     foreach (sort keys %$results) {
-	print $outputfh "$_\t$$results{$_}\n";
+		print $outputfh "$_\t$$results{$_}\n";
     }
 }
 
 sub samtools {
 
 	my ($bam, $chr, $start, $end, $out) = @_;
-	my $cmd = "samtools view -bo $out $bam \'$chr:$start-$end\'";
+
+	my $cmd;
+	if ($irods eq 'true') {
+		$cmd = "samtools view -bo $out irods:$bam \'$chr:$start-$end\'";
+	} else {
+		$cmd = "samtools view -bo $out $bam \'$chr:$start-$end\'";
+	}
 	
 	system($cmd);
-	
+		
 	$cmd = "samtools index $out";
 	system($cmd);
         
