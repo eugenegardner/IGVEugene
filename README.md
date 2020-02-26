@@ -15,6 +15,7 @@ This is a short script that slices bams at a provided set of coordinates and the
 | -slicedir | directory where bam slices are stored | **none** |
 | -volumes | directory where bam slices are stored on local machine | **none** |
 | -output | file to write results to. Default writes to STDOUT. | **none** |
+| -irods | enable irods support. You currently cannot mix irods and non-irods bam in the same -bams input file. | false |
 
 **Note:** -slicedir and -volumes are seperate so that if bams and slices are stored on a remote machine, you can provide a different directory to store slices and a different directory to view from. On macos, this is typically done via mounting a fileshare which will appear in the `/Volumes/` directory.
 
@@ -44,3 +45,13 @@ Columns 2 **OR** 3 can be blank in the form of a '-' to represent no proband/non
 `./trio_slicer.pl -bams <BAMFILE> -hostname <192.168.0.1> -slicedir /scratch/bamslices/ -volumes /Volumes/bamslices/`
 
 3. Look at bams. The script will proceed one line at a time and pause with the prompt "Site Quality: " and wait for the user to put in some value, or simply press the "RETURN" key. Or, if "QUIT" is entered, all previous variant site information will be dumped for the user.
+
+## iRODs Support
+
+To use IGVEugene with iRODs (e.g. with the -irods flag), you must meet the following requirements:
+
+1. Have a version of samtools installed with irods support and in your path.
+2. Initialize your access to your iRODs directory (e.g. `kinit`).
+3. Have access to the iRODs group that you need to access bams from.
+
+**Warning:** IGVEugene will not tell you if you meet these requirements! It will just crash with an input/output error or claim that samtools does not support iRODs.
